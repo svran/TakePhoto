@@ -1,0 +1,13 @@
+<resources>
+    <string name="album_view">图片选择</string>
+    <string name="image_view">点击选择图片</string>
+
+    <string name="add">完成</string>
+    <string name="selected">已选择</string>
+    <string name="limit_exceeded">最多只能选择 %d 张图片</string>
+
+    <string name="permission_denied_albums">允许访问照片，媒体和文件在您的设备上查看相册</string>
+    <string name="permission_denied_images">允许访问照片，媒体和文件在您的设备上查看图像</string>
+    <string name="grant_permission">授予许可</string>
+    <string name="error_null_cursor">哎呀，出了点问题!</string>
+</resources>
