@@ -7,6 +7,8 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -15,6 +17,7 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -87,10 +90,19 @@ public class ImageSelectActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        Drawable icArrowBack = ContextCompat.getDrawable(this, R.drawable.ic_arrow_back);
+        int color = ContextCompat.getColor(this, R.color.multiple_image_select_primary);
+        assert icArrowBack != null;
+        if (Color.red(color) * 0.299 + Color.green(color) * 0.578 + Color.blue(color) * 0.114 >= 192) { //浅色
+            DrawableCompat.setTint(icArrowBack, 0xFF000000);
+        } else {  //深色
+            DrawableCompat.setTint(icArrowBack, 0xFFFFFFFF);
+        }
+
         actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back);
+            actionBar.setHomeAsUpIndicator(icArrowBack);
 
             actionBar.setDisplayShowTitleEnabled(true);
             actionBar.setTitle(R.string.image_view);
@@ -497,6 +509,17 @@ public class ImageSelectActivity extends AppCompatActivity {
             }
             images.clear();
             images.addAll(temp);
+            /*//
+            if (Constants.selected != null && !Constants.selected.isEmpty()) {
+                for (int i = 0; i < images.size(); i++) {
+                    for (int j = 0; j < Constants.selected.size(); j++) {
+                        if (Constants.selected.get(j).equals(images.get(i).path)) {
+                            images.get(i).isSelected = true;
+                            countSelected += 1;
+                        }
+                    }
+                }
+            }//*/
 
             message = handler.obtainMessage();
             message.what = Constants.FETCH_COMPLETED;

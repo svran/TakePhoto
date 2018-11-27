@@ -67,9 +67,6 @@ public class CustomHelper {
         etSize = (EditText) rootView.findViewById(R.id.etSize);
         etHeightPx = (EditText) rootView.findViewById(R.id.etHeightPx);
         etWidthPx = (EditText) rootView.findViewById(R.id.etWidthPx);
-
-
-
     }
 
     public void onClick(View view, TakePhoto takePhoto) {

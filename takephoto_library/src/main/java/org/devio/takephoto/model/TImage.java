@@ -1,8 +1,8 @@
 package org.devio.takephoto.model;
 
 import android.net.Uri;
-
-import java.io.Serializable;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * TakePhoto 操作成功返回的处理结果
@@ -10,10 +10,11 @@ import java.io.Serializable;
  * Author: JPH
  * Date: 2016/8/11 17:01
  */
-public class TImage implements Serializable {
+public class TImage implements Parcelable {
     private String originalPath;
     private String compressPath;
     private FromType fromType;
+    private long id;
     private boolean cropped;
     private boolean compressed;
 
@@ -33,6 +34,14 @@ public class TImage implements Serializable {
     private TImage(Uri uri, FromType fromType) {
         this.originalPath = uri.getPath();
         this.fromType = fromType;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getOriginalPath() {
@@ -78,4 +87,41 @@ public class TImage implements Serializable {
     public enum FromType {
         CAMERA, OTHER
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.originalPath);
+        dest.writeString(this.compressPath);
+        dest.writeInt(this.fromType == null ? -1 : this.fromType.ordinal());
+        dest.writeLong(this.id);
+        dest.writeByte(this.cropped ? (byte) 1 : (byte) 0);
+        dest.writeByte(this.compressed ? (byte) 1 : (byte) 0);
+    }
+
+    protected TImage(Parcel in) {
+        this.originalPath = in.readString();
+        this.compressPath = in.readString();
+        int tmpFromType = in.readInt();
+        this.fromType = tmpFromType == -1 ? null : FromType.values()[tmpFromType];
+        this.id = in.readLong();
+        this.cropped = in.readByte() != 0;
+        this.compressed = in.readByte() != 0;
+    }
+
+    public static final Parcelable.Creator<TImage> CREATOR = new Parcelable.Creator<TImage>() {
+        @Override
+        public TImage createFromParcel(Parcel source) {
+            return new TImage(source);
+        }
+
+        @Override
+        public TImage[] newArray(int size) {
+            return new TImage[size];
+        }
+    };
 }

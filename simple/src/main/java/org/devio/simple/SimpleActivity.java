@@ -2,6 +2,7 @@ package org.devio.simple;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -44,7 +45,11 @@ public class SimpleActivity extends TakePhotoActivity {
     }
 
     public void onClick(View view) {
+        Log.d("(L:", "onClick: 点击了1 : " + (selected == null));
         customHelper.onClick(view, getTakePhoto());
+        for (int i = 0; i < selected.size(); i++) {
+            Log.d("123(L:", "onClick: "  + selected.get(i));
+        }
     }
 
     @Override
@@ -57,9 +62,14 @@ public class SimpleActivity extends TakePhotoActivity {
         super.takeFail(result, msg);
     }
 
+    private ArrayList<String> selected = new ArrayList<>();
     @Override
     public void takeSuccess(TResult result) {
         super.takeSuccess(result);
+        if (selected != null) selected.clear();
+        for (int i = 0; i < result.getImages().size(); i++) {
+            selected.add(result.getImages().get(i).getOriginalPath());
+        }
         showImg(result.getImages());
     }
 

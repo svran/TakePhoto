@@ -1,6 +1,7 @@
 package com.darsh.multipleimageselect.adapters;
 
 import android.content.Context;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -47,7 +48,7 @@ public class CustomImageSelectAdapter extends CustomGenericAdapter<Image> {
 
         if (arrayList.get(position).isSelected) {
             viewHolder.view.setAlpha(0.5f);
-            ((FrameLayout) convertView).setForeground(context.getResources().getDrawable(R.drawable.ic_done_white));
+            ((FrameLayout) convertView).setForeground(ContextCompat.getDrawable(context, R.drawable.ic_done_white));
 
         } else {
             viewHolder.view.setAlpha(0.0f);

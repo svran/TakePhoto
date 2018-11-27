@@ -4,13 +4,15 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
-import org.devio.takephoto.model.MultipleCrop;
-import org.devio.takephoto.model.TException;
-import org.devio.takephoto.permission.PermissionManager;
 import org.devio.takephoto.compress.CompressConfig;
 import org.devio.takephoto.model.CropOptions;
+import org.devio.takephoto.model.MultipleCrop;
+import org.devio.takephoto.model.TException;
 import org.devio.takephoto.model.TResult;
 import org.devio.takephoto.model.TakePhotoOptions;
+import org.devio.takephoto.permission.PermissionManager;
+
+import java.util.ArrayList;
 
 
 /**
@@ -34,6 +36,14 @@ import org.devio.takephoto.model.TakePhotoOptions;
  * Email:crazycodeboy@gmail.com
  */
 public interface TakePhoto {
+    /**
+     * 图片多选
+     *
+     * @param limit    最多选择图片张数的限制
+     * @param selected 已经选择的图片路径集合
+     */
+    void onPickMultiple(int limit, ArrayList<String> selected);
+
     /**
      * 图片多选
      *

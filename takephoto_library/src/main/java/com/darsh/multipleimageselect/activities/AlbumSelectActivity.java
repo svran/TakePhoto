@@ -7,14 +7,18 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -40,15 +44,23 @@ import java.util.HashSet;
 
 /**
  * Created by Darshan on 4/14/2015.
+ * 功能介绍:  <br/>
+ * 调用方式:  <br/>
+ * <p/>
+ * 创建作者: Svran - 924633827@qq.com<br/>
+ * 创建电脑: Svran-MY  <br/>
+ * 创建时间: 2018/11/23 15:55 <br/>
+ * 最后编辑: 2018/11/23 15:55 - Svran<br/>
+ *
+ * @author Svran
  */
 public class AlbumSelectActivity extends AppCompatActivity {
-    private final String TAG = AlbumSelectActivity.class.getName();
 
     private ArrayList<Album> albums;
 
     private TextView requestPermission;
     private Button grantPermission;
-    private final String[] requiredPermissions = new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE };
+    private final String[] requiredPermissions = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE};
 
     private TextView errorDisplay;
 
@@ -62,7 +74,7 @@ public class AlbumSelectActivity extends AppCompatActivity {
     private Handler handler;
     private Thread thread;
 
-    private final String[] projection = new String[]{ MediaStore.Images.Media.BUCKET_DISPLAY_NAME, MediaStore.Images.Media.DATA };
+    private final String[] projection = new String[]{MediaStore.Images.Media.BUCKET_DISPLAY_NAME, MediaStore.Images.Media.DATA};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,10 +84,19 @@ public class AlbumSelectActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        Drawable icArrowBack = ContextCompat.getDrawable(this, R.drawable.ic_arrow_back);
+        int color = ContextCompat.getColor(this, R.color.multiple_image_select_primary);
+        assert icArrowBack != null;
+        if ((float) Color.red(color) * 0.299f + (float) Color.green(color) * 0.578f + (float) Color.blue(color) * 0.114f >= 192f) { //浅色
+            DrawableCompat.setTint(icArrowBack, 0xFF000000);
+        } else {  //深色
+            DrawableCompat.setTint(icArrowBack, 0xFFFFFFFF);
+        }
+
         actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeAsUpIndicator(R.drawable.ic_arrow_back);
+            actionBar.setHomeAsUpIndicator(icArrowBack);
 
             actionBar.setDisplayShowTitleEnabled(true);
             actionBar.setTitle(R.string.album_view);
@@ -84,8 +105,10 @@ public class AlbumSelectActivity extends AppCompatActivity {
         Intent intent = getIntent();
         if (intent == null) {
             finish();
+            return;
         }
         Constants.limit = intent.getIntExtra(Constants.INTENT_EXTRA_LIMIT, Constants.DEFAULT_LIMIT);
+        Constants.selected = intent.getStringArrayListExtra(Constants.INTENT_EXTRA_SELECTED);
 
         errorDisplay = (TextView) findViewById(R.id.text_view_error);
         errorDisplay.setVisibility(View.INVISIBLE);
@@ -115,64 +138,62 @@ public class AlbumSelectActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        if (handler == null)
+            handler = new Handler(new Handler.Callback() {
+                @Override
+                public boolean handleMessage(Message msg) {
+                    switch (msg.what) {
+                        case Constants.PERMISSION_GRANTED: {
+                            hidePermissionHelperUI();
 
-        handler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case Constants.PERMISSION_GRANTED: {
-                        hidePermissionHelperUI();
+                            loadAlbums();
 
-                        loadAlbums();
-
-                        break;
-                    }
-
-                    case Constants.PERMISSION_DENIED: {
-                        showPermissionHelperUI();
-
-                        progressBar.setVisibility(View.INVISIBLE);
-                        gridView.setVisibility(View.INVISIBLE);
-
-                        break;
-                    }
-
-                    case Constants.FETCH_STARTED: {
-                        progressBar.setVisibility(View.VISIBLE);
-                        gridView.setVisibility(View.INVISIBLE);
-
-                        break;
-                    }
-
-                    case Constants.FETCH_COMPLETED: {
-                        if (adapter == null) {
-                            adapter = new CustomAlbumSelectAdapter(getApplicationContext(), albums);
-                            gridView.setAdapter(adapter);
-
-                            progressBar.setVisibility(View.INVISIBLE);
-                            gridView.setVisibility(View.VISIBLE);
-                            orientationBasedUI(getResources().getConfiguration().orientation);
-
-                        } else {
-                            adapter.notifyDataSetChanged();
+                            break;
                         }
 
-                        break;
-                    }
+                        case Constants.PERMISSION_DENIED: {
+                            showPermissionHelperUI();
 
-                    case Constants.ERROR: {
-                        progressBar.setVisibility(View.INVISIBLE);
-                        errorDisplay.setVisibility(View.VISIBLE);
+                            progressBar.setVisibility(View.INVISIBLE);
+                            gridView.setVisibility(View.INVISIBLE);
 
-                        break;
-                    }
+                            break;
+                        }
 
-                    default: {
-                        super.handleMessage(msg);
+                        case Constants.FETCH_STARTED: {
+                            progressBar.setVisibility(View.VISIBLE);
+                            gridView.setVisibility(View.INVISIBLE);
+
+                            break;
+                        }
+
+                        case Constants.FETCH_COMPLETED: {
+                            if (adapter == null) {
+                                adapter = new CustomAlbumSelectAdapter(getApplicationContext(), albums);
+                                gridView.setAdapter(adapter);
+
+                                progressBar.setVisibility(View.INVISIBLE);
+                                gridView.setVisibility(View.VISIBLE);
+                                orientationBasedUI(getResources().getConfiguration().orientation);
+
+                            } else {
+                                adapter.notifyDataSetChanged();
+                            }
+
+                            break;
+                        }
+
+                        case Constants.ERROR: {
+                            progressBar.setVisibility(View.INVISIBLE);
+                            errorDisplay.setVisibility(View.VISIBLE);
+
+                            break;
+                        }
+                        default:
                     }
+                    return false;
                 }
-            }
-        };
+            });
         observer = new ContentObserver(handler) {
             @Override
             public void onChange(boolean selfChange, Uri uri) {
@@ -203,7 +224,7 @@ public class AlbumSelectActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == Constants.PERMISSION_REQUEST_READ_EXTERNAL_STORAGE) {
             Message message = handler.obtainMessage();
             message.what = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED ? Constants.PERMISSION_GRANTED : Constants.PERMISSION_DENIED;
@@ -259,6 +280,7 @@ public class AlbumSelectActivity extends AppCompatActivity {
     private void orientationBasedUI(int orientation) {
         final WindowManager windowManager = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
         final DisplayMetrics metrics = new DisplayMetrics();
+        assert windowManager != null;
         windowManager.getDefaultDisplay().getMetrics(metrics);
 
         if (adapter != null) {

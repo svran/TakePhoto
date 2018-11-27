@@ -12,27 +12,28 @@ import android.widget.Toast;
 
 import com.darsh.multipleimageselect.helpers.Constants;
 import com.darsh.multipleimageselect.models.Image;
+import com.soundcloud.android.crop.Crop;
+
+import org.devio.takephoto.compress.CompressConfig;
 import org.devio.takephoto.compress.CompressImage;
 import org.devio.takephoto.compress.CompressImageImpl;
+import org.devio.takephoto.model.CropOptions;
 import org.devio.takephoto.model.MultipleCrop;
+import org.devio.takephoto.model.TContextWrap;
 import org.devio.takephoto.model.TException;
 import org.devio.takephoto.model.TExceptionType;
 import org.devio.takephoto.model.TImage;
 import org.devio.takephoto.model.TIntentWap;
-import org.devio.takephoto.permission.PermissionManager;
-import org.devio.takephoto.uitl.TUriParse;
-import org.devio.takephoto.compress.CompressConfig;
-import org.devio.takephoto.model.CropOptions;
-import org.devio.takephoto.model.TContextWrap;
 import org.devio.takephoto.model.TResult;
 import org.devio.takephoto.model.TakePhotoOptions;
+import org.devio.takephoto.permission.PermissionManager;
 import org.devio.takephoto.uitl.ImageRotateUtil;
 import org.devio.takephoto.uitl.IntentUtils;
 import org.devio.takephoto.uitl.TConstant;
 import org.devio.takephoto.uitl.TFileUtils;
 import org.devio.takephoto.uitl.TImageFiles;
+import org.devio.takephoto.uitl.TUriParse;
 import org.devio.takephoto.uitl.TUtils;
-import com.soundcloud.android.crop.Crop;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -259,12 +260,21 @@ public class TakePhotoImpl implements TakePhoto {
     }
 
     @Override
+    public void onPickMultiple(int limit, ArrayList<String> selected) {
+        if (PermissionManager.TPermissionType.WAIT.equals(permissionType)) {
+            return;
+        }
+        TUtils.startActivityForResult(contextWrap,
+            new TIntentWap(IntentUtils.getPickMultipleIntent(contextWrap, limit, selected), TConstant.RC_PICK_MULTIPLE));
+    }
+
+    @Override
     public void onPickMultiple(int limit) {
         if (PermissionManager.TPermissionType.WAIT.equals(permissionType)) {
             return;
         }
         TUtils.startActivityForResult(contextWrap,
-            new TIntentWap(IntentUtils.getPickMultipleIntent(contextWrap, limit), TConstant.RC_PICK_MULTIPLE));
+            new TIntentWap(IntentUtils.getPickMultipleIntent(contextWrap, limit, new ArrayList<String>()), TConstant.RC_PICK_MULTIPLE));
     }
 
     @Override

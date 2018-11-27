@@ -52,7 +52,7 @@ public class SimpleFragment extends TakePhotoFragment {
     }
 
     public void onClick(View view) {
-        customHelper.onClick(view, getTakePhoto());
+        customHelper.onClick(view, getTakePhoto(), selected);
     }
 
     @Override
@@ -65,9 +65,15 @@ public class SimpleFragment extends TakePhotoFragment {
         super.takeFail(result, msg);
     }
 
+    private ArrayList<String> selected = new ArrayList<>();
+
     @Override
     public void takeSuccess(TResult result) {
         super.takeSuccess(result);
+        if (selected != null) selected.clear();
+        for (int i = 0; i < result.getImages().size(); i++) {
+            selected.add(result.getImages().get(i).getOriginalPath());
+        }
         showImg(result.getImages());
     }
 

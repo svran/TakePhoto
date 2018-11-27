@@ -8,8 +8,11 @@ import android.util.Log;
 
 import com.darsh.multipleimageselect.activities.AlbumSelectActivity;
 import com.darsh.multipleimageselect.helpers.Constants;
+
 import org.devio.takephoto.model.CropOptions;
 import org.devio.takephoto.model.TContextWrap;
+
+import java.util.ArrayList;
 
 /**
  * Intent工具类用于生成拍照、
@@ -23,11 +26,13 @@ public class IntentUtils {
     /**
      * 获取图片多选的Intent
      *
-     * @param limit 最多选择图片张数的限制
+     * @param limit    最多选择图片张数的限制
+     * @param selected 已选择
      */
-    public static Intent getPickMultipleIntent(TContextWrap contextWrap, int limit) {
+    public static Intent getPickMultipleIntent(TContextWrap contextWrap, int limit, ArrayList<String> selected) {
         Intent intent = new Intent(contextWrap.getActivity(), AlbumSelectActivity.class);
         intent.putExtra(Constants.INTENT_EXTRA_LIMIT, limit > 0 ? limit : 1);
+        intent.putStringArrayListExtra(Constants.INTENT_EXTRA_SELECTED, selected);
         return intent;
     }
 
