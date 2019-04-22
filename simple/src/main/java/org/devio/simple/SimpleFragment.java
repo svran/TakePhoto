@@ -52,7 +52,7 @@ public class SimpleFragment extends TakePhotoFragment {
     }
 
     public void onClick(View view) {
-        customHelper.onClick(view, getTakePhoto(), selected);
+        customHelper.onClick(view, getTakePhoto());
     }
 
     @Override
